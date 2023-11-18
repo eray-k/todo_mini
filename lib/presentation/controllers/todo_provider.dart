@@ -25,4 +25,9 @@ class TodoNotifier extends _$TodoNotifier {
     await sl<TodosRepository>().setTodos([newTodo]);
     ref.invalidate(todoNotifierProvider);
   }
+
+  Future<void> removeTodo(Todo targetTodo) async {
+    await sl<TodosRepository>().removeTodos([targetTodo]);
+    ref.invalidate(todoNotifierProvider);
+  }
 }
