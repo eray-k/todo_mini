@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_mini/presentation/controllers/todo_provider.dart';
 import '../../core/widget/dialog_buttons.dart';
 import '../../data/models/todo.dart';
 
@@ -88,7 +90,8 @@ class _CustomTodoDialogState extends State<CustomTodoDialog> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             if (widget.hasDeleteButton) ...[
-              _deleteItem(),
+              Consumer(
+                  builder: (context, ref, child) => _deleteItem(context, ref)),
               const Expanded(
                   child: Placeholder(
                 color: Colors.transparent,
@@ -103,9 +106,12 @@ class _CustomTodoDialogState extends State<CustomTodoDialog> {
     );
   }
 
-  TextButton _deleteItem() => TextButton(
+  TextButton _deleteItem(BuildContext context, WidgetRef ref) => TextButton(
       onPressed: () {
         //Deleted
+        ref.read(todoNotifierProvider.notifier).removeTodo(widget.initialTodo);
+        print("deleted");
+        Navigator.of(context).pop();
       },
       child: const Text("Delete"));
 }
