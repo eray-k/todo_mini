@@ -1,36 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/widget/dialog_buttons.dart';
 import '../../data/models/todo.dart';
-import '../controllers/edit_todo_provider.dart';
 
-class EditTodoDialog extends ConsumerStatefulWidget {
+class EditTodoDialog extends StatefulWidget {
   const EditTodoDialog({
     super.key,
     required this.initialTodo,
   });
   final Todo initialTodo;
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _EditTodoDialogState();
+  State<StatefulWidget> createState() => _EditTodoDialogState();
 }
 
-class _EditTodoDialogState extends ConsumerState<EditTodoDialog> {
+class _EditTodoDialogState extends State<EditTodoDialog> {
   late final TextEditingController _controller;
+  late Todo todo;
   @override
   void initState() {
+    todo = widget.initialTodo;
     _controller = TextEditingController.fromValue(TextEditingValue(
       text: widget.initialTodo.content,
     ));
     _controller.addListener(() {
-      ref.read(editedTodoNotifierProvider.notifier).state = ref
-          .read(editedTodoNotifierProvider.notifier)
-          .state
-          .copyWith(content: _controller.text);
+      setState(() {
+        todo = todo.copyWith(content: _controller.text);
+      });
     });
-    Future(() {
-      ref.read(editedTodoNotifierProvider.notifier).state = widget.initialTodo;
-    });
-
     super.initState();
   }
 
@@ -42,7 +37,6 @@ class _EditTodoDialogState extends ConsumerState<EditTodoDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final Todo todo = ref.watch(editedTodoNotifierProvider);
     print("edited todo: $todo");
     return AlertDialog.adaptive(
       title: const Text("Edit Task"),
@@ -60,8 +54,9 @@ class _EditTodoDialogState extends ConsumerState<EditTodoDialog> {
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
-                ref.read(editedTodoNotifierProvider.notifier).state =
-                    todo.copyWith(isCompleted: !todo.isCompleted);
+                setState(() {
+                  todo = todo.copyWith(isCompleted: !todo.isCompleted);
+                });
               },
               child: Row(
                 children: [
