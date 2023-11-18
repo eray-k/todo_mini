@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_mini/core/util/date_converter.dart';
+import 'package:todo_mini/presentation/widgets/add_todo_dialog.dart';
 
 import '../../core/datastate.dart';
 import '../../data/models/todo.dart';
@@ -49,6 +51,13 @@ class HomePage extends ConsumerWidget {
                               onTap: () {
                                 //TODO: Add Task Window
                                 print("Add New Task");
+                                _showDialog(context, ref,
+                                    (context) => const AddTodoDialog(),
+                                    (resultTodo) {
+                                  ref
+                                      .read(todoNotifierProvider.notifier)
+                                      .addTodo(resultTodo);
+                                });
                               },
                               child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -64,24 +73,20 @@ class HomePage extends ConsumerWidget {
                       }
                       final item = todoList[index - 1];
                       final daysLeft =
-                          DateTime.now().difference(item.dueDate).inDays;
-                      final daysLeftStr = switch (daysLeft) {
-                        (== 1) => "1 day",
-                        (> 1 && <= 9) => "$daysLeft days",
-                        _ => ">1 week",
-                      };
+                          item.dueDate.difference(DateTime.now()).inDays;
+                      final daysLeftStr =
+                          DateConverter.convert(daysLeft, false);
                       return Material(
                         color: Colors.transparent,
                         child: InkWell(
                             onTap: () {
                               print("Edit Task"); //Edit Task Window
-                              Future(() async {
-                                Todo? resultTodo = await showDialog(
-                                  context: context,
-                                  builder: (context) =>
+                              _showDialog(
+                                  context,
+                                  ref,
+                                  (context) =>
                                       EditTodoDialog(initialTodo: item),
-                                );
-                                if (resultTodo == null) return;
+                                  (resultTodo) {
                                 ref
                                     .read(todoNotifierProvider.notifier)
                                     .updateTodo(item, resultTodo);
@@ -107,5 +112,18 @@ class HomePage extends ConsumerWidget {
           error: (error, stackTrace) => Text('Error occured : $error'),
           loading: () => const CircularProgressIndicator(),
         );
+  }
+
+  Future<void> _showDialog(
+      BuildContext context,
+      WidgetRef ref,
+      Widget Function(BuildContext context) build,
+      void Function(Todo todo) callback) async {
+    Todo? resultTodo = await showDialog(
+      context: context,
+      builder: build,
+    );
+    if (resultTodo == null) return;
+    callback(resultTodo);
   }
 }

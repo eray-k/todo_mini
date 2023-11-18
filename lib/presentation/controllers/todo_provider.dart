@@ -20,4 +20,9 @@ class TodoNotifier extends _$TodoNotifier {
     ]);
     ref.invalidate(todoNotifierProvider);
   }
+
+  Future<void> addTodo(Todo newTodo) async {
+    await sl<TodosRepository>().setTodos([newTodo]);
+    ref.invalidate(todoNotifierProvider);
+  }
 }
